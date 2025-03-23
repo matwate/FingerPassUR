@@ -1,0 +1,87 @@
+# =====================
+# Go-specific
+# =====================
+/bin/
+/build/
+/dist/
+*.exe
+*.test
+*.out
+*.a
+*.o
+*.so
+*.dll
+*.dylib
+
+# Go coverage / testing
+coverage.out
+*.coverprofile
+
+# Go module cache (just in case)
+/vendor/
+
+# go.work related
+go.work
+go.work.sum
+
+# =====================
+# macOS
+# =====================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# macOS Finder tags
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+
+# =====================
+# Linux
+# =====================
+*~
+.*.swp
+.*.swo
+.cache/
+tmp/
+*.bak
+
+# =====================
+# IDEs / Editors
+# =====================
+
+# VSCode
+.vscode/
+.code-workspace
+
+# JetBrains (GoLand, etc.)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Emacs
+*~
+.#*
+
+# Vim
+*.swp
+*.swo
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# =====================
+# Logs / Misc
+# =====================
+*.log
+*.pid
+*.tmp
+
+# =====================
+# Git
+# =====================
+.git/

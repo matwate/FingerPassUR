@@ -15,3 +15,5 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 )
+
+replace github.com/miqdadyyy/go-sourceafis => ../go-sourceafis
