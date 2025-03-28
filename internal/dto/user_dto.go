@@ -6,3 +6,11 @@ type UserRequest struct {
 	Nombre   string `json:"nombre"`
 	Programa string `json:"programa"`
 }
+
+type UserByFpPrintRequest struct {
+	Template string `json:"template"` // Base64 encoded template
+}
+
+type UserByFpPrintResponse struct {
+	Usuario string `json:"usuario"`
+}

@@ -6,13 +6,13 @@ import (
 	"log"
 	"os"
 
-  "github.com/matwate/corner/internal/model"
-
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+
+	"github.com/matwate/corner/internal/model"
 )
 
-const connectionString string = "user=zryogi password=pPassZr dbname=FingerPassUR sslmode=disable" 
+const connectionString string = "user=postgres password=postgres dbname=FingerPassUR sslmode=disable"
 
 /*
 
@@ -44,7 +44,7 @@ func LoadSchema() string {
 func InsertUser(template, correo, nombre, programa string) {
 	db, err := sqlx.Connect(
 		"postgres",
-    connectionString,
+		connectionString,
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -137,4 +137,18 @@ func ListALLImages() []model.Image {
 	db.Select(&images, "SELECT * FROM Images")
 	fmt.Println(images)
 	return images
+}
+
+func GetUser(id int) (model.User, error) {
+	db, err := sqlx.Connect(
+		"postgres",
+		connectionString,
+	)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	var user model.User
+	db.Get(&user, "SELECT * FROM Usuarios WHERE id = $1", id)
+	return user, nil
 }

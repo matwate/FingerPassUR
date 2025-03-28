@@ -7,10 +7,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-  "github.com/matwate/corner/internal/repository"
 
-  "github.com/matwate/corner/internal/dto"
-  "github.com/matwate/corner/internal/model"
+	"github.com/matwate/corner/internal/dto"
+	"github.com/matwate/corner/internal/model"
+	"github.com/matwate/corner/internal/repository"
+	"github.com/matwate/corner/internal/service"
 )
 
 func HandleCreateNewUser(w http.ResponseWriter, r *http.Request) {
@@ -41,9 +42,46 @@ func HandleCreateNewUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleGetUserFromFpPrint(w http.ResponseWriter, r *http.Request) {
-	// Uninmplemented
-	w.WriteHeader(http.StatusNotImplemented)
-	w.Write([]byte("Not implemented"))
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body",
+			http.StatusInternalServerError)
+		return
+	}
+	var req dto.UserByFpPrintRequest
+	err = json.Unmarshal(body, &req)
+	if err != nil {
+		http.Error(w, "Error parsing request body",
+			http.StatusBadRequest)
+	}
+
+	templateStr := req.Template
+	template := service.Base64ToTemplate(templateStr)
+	user_id := service.MatchTemplates(template)
+	// Get the name
+	user, err := repository.GetUser(user_id)
+	if err != nil {
+		http.Error(w, "Error getting user",
+			http.StatusInternalServerError)
+		resp := dto.UserByFpPrintResponse{
+			Usuario: "",
+		}
+		response, err := json.Marshal(resp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write(response)
+	}
+	resp := dto.UserByFpPrintResponse{
+		Usuario: user.Nombre,
+	}
+	response, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(response)
 }
 
 func HandleGetUsers(w http.ResponseWriter, r *http.Request) {
