@@ -1,0 +1,29 @@
+[
+	{
+		"arguments": [
+			"clang",
+			"src/main.c",
+			"-o",
+			"/home/khamsin/.cache/zig/main.c.o",
+			"-Wall",
+			"-llibfprint-2",
+      "-lglib-2.0",
+      "-I/usr/include/libfprint-2",
+      "-I/usr/include/gio-unix-2.0",
+      "-I/usr/include/libmount",
+      "-I/usr/include/blkid",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-I/usr/lib/aarch64-linux-gnu/glib-2.0/include", 
+      "-pthread",
+      "-lfprint-2",
+      "-lgio-2.0",
+      "-lgobject-2.0",
+      "-lglib-2.0"
+    ],
+    "directory": "/home/khamsin/dev/urfp",
+    "file": "/home/khamsin/dev/urfp/src/main.c",
+		"output": "/home/khamsin/.cache/zig/main.c.o"
+	}
+]

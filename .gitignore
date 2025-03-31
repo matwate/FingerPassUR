@@ -85,3 +85,12 @@ tmp/
 # Git
 # =====================
 .git/
+
+.zig-cache
+urfp
+urfp.1
+img.pgm
+img.png
+img.pgm.png
+zig-out
+*.bin
