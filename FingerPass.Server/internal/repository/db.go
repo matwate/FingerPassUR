@@ -19,7 +19,7 @@ var dbname = os.Getenv("POSTGRES_DB")
 var db_host = os.Getenv("POSTGRES_HOST")
 var connectionString string = fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", db_host, user, password, dbname)
 
-func InsertUser(template, correo, nombre, programa string) {
+func InsertUser(template, correo, nombre, programa string) int {
 	template_uuid := uuid.New()
 	template_path := fmt.Sprintf("./templates/%s.bin", template_uuid.String())
 
@@ -70,9 +70,29 @@ func InsertUser(template, correo, nombre, programa string) {
 	)
 
 	tx.Commit()
+	return id
 }
 
-func InsertImage(user_id int, path string) {
+func InsertImage(user_id int, template string) {
+	template_uuid := uuid.New()
+	template_path := fmt.Sprintf("./templates/%s.bin", template_uuid.String())
+
+	// Convert the template base64 to a file and get its path
+	dec, err := base64.StdEncoding.DecodeString(template)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	f, err := os.Create(template_path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	_, err = f.Write(dec) // Write the decoded template to the file
+	if err != nil {
+		log.Fatal(err)
+	}
 	db, err := sqlx.Connect(
 		"postgres",
 		connectionString,
@@ -84,7 +104,7 @@ func InsertImage(user_id int, path string) {
 	tx := db.MustBegin()
 	tx.MustExec(
 		"INSERT INTO Images (path, user_id) VALUES ($1, $2)",
-		path,
+		template_path,
 		user_id,
 	)
 	tx.Commit()

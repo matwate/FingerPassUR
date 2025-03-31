@@ -93,3 +93,4 @@ img.pgm
 img.png
 img.pgm.png
 zig-out
+*.bin

@@ -29,12 +29,9 @@ func HandleCreateNewUser(w http.ResponseWriter, r *http.Request) {
 			http.StatusBadRequest)
 	}
 
-	repository.InsertUser(req.Template, req.Correo, req.Nombre, req.Programa)
+	user_id := repository.InsertUser(req.Template, req.Correo, req.Nombre, req.Programa)
 	response := dto.Response{
-		Message: fmt.Sprintf(
-			"Template: %s, Nombre: %s, Correo: %s, Programa: %s",
-			req.Template, req.Nombre, req.Correo, req.Programa,
-		),
+		Message: fmt.Sprintf("{\"user_id\":%d}", user_id),
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -59,6 +56,7 @@ func HandleGetUserFromFpPrint(w http.ResponseWriter, r *http.Request) {
 	templateStr := req.Template
 	template := service.Base64ToTemplate(templateStr)
 	user_id := service.MatchTemplates(template)
+	log.Print("USER_ID!!!! {}", user_id)
 	// Get the name
 	user, err := repository.GetUser(user_id)
 	if err != nil {
@@ -74,6 +72,7 @@ func HandleGetUserFromFpPrint(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(response)
 	}
+	log.Print("USERNAME!!!1 {}", user.Nombre)
 	resp := dto.UserByFpPrintResponse{
 		Usuario: user.Nombre,
 	}
