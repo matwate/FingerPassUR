@@ -13,6 +13,7 @@ require (
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.5.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/jtejido/go-wsq v0.0.3-beta // indirect
 	github.com/mcuadros/go-defaults v1.2.0 // indirect
 	github.com/spakin/netpbm v1.3.0 // indirect

@@ -8,6 +8,7 @@ import (
 	"image/png"
 	"log"
 	"os"
+	"strconv"
 	"sync"
 
 	"github.com/miqdadyyy/go-sourceafis"
@@ -21,6 +22,7 @@ var (
 	transparencyLogger = sourceafis.NewTransparencyLogger(UrTransparencyProvider{})
 	Templates          []*templates.SearchTemplate
 	UserMap            map[int]int = make(map[int]int) // From index to the array to the user id
+	BatchSize  = os.Getenv("BATCH_SIZE") 
 )
 
 func LoadTemplates(templs *[]*templates.SearchTemplate) {
@@ -31,39 +33,64 @@ func LoadTemplates(templs *[]*templates.SearchTemplate) {
 
 	c := sourceafis.NewTemplateCreator(transparencyLogger)
 	var wg sync.WaitGroup
-	for i, img := range Images {
-		wg.Add(1)
-		go func(img model.Image, i int) {
-			defer wg.Done()
-			// Open the image file
-			file, err := os.Open(img.Template)
-			if err != nil {
-				log.Fatal(err)
-				panic("Something went wrong")
-			}
-			defer file.Close()
-			// Decode the image
-			image, err := png.Decode(file)
-			if err != nil {
-				log.Fatal(err)
-				panic("Something went wrong")
-			}
 
-			// Create a template from the image
-			sImage, err := sourceafis.NewFromImage(image)
-			if err != nil {
-				log.Fatal(err)
-				panic("Something went wrong!")
+	// Determine the number of batches to use and the number of images per bach 
+	BatchSizeInt, err := strconv.Atoi(BatchSize)
+	if err != nil {
+		log.Fatal(err)
+	}
+	numBatches := len(Images) / BatchSizeInt
+	remainingImages := len(Images) % BatchSizeInt
+	for i := range numBatches {
+		wg.Add(1)
+		fmt.Println("Batch: ", i)
+
+		// Determine what range of images we're gonna use.
+		var from, to int 
+		if i == numBatches - 1 && remainingImages != 0 {
+			from = i * BatchSizeInt
+			to = from + remainingImages
+		} else {
+			from = i * BatchSizeInt
+			to = from + BatchSizeInt
+		}
+
+
+		go func(images []model.Image, i int) {
+			// Determine what range of images we're gonna use.
+			for j, img := range images {
+				// Open the image file
+				file, err := os.Open(img.Template)
+				if err != nil {
+					log.Fatal(err)
+					panic("Something went wrong")
+				}
+				defer file.Close()
+				// Decode the image
+				image, err := png.Decode(file)
+				if err != nil {
+					log.Fatal(err)
+					panic("Something went wrong")
+				}
+
+				// Create a template from the image
+				sImage, err := sourceafis.NewFromImage(image)
+				if err != nil {
+					log.Fatal(err)
+					panic("Something went wrong!")
+				}
+				// Add the template to the list
+				template, err := c.Template(sImage)
+				if err != nil {
+					log.Fatal(err)
+					panic("Something went wrong")
+				}
+				ImagesTemplates[j] = template
+				UserMap[j] = img.User_id
 			}
-			// Add the template to the list
-			template, err := c.Template(sImage)
-			if err != nil {
-				log.Fatal(err)
-				panic("Something went wrong")
-			}
-			ImagesTemplates[i] = template
-			UserMap[i] = img.User_id
-		}(img, i)
+				
+			
+		}(Images[from:to], i)
 
 	}
 	wg.Wait()
@@ -112,14 +139,38 @@ func MatchTemplates(
 	// Get all similarity scores concurrently
 	matches := make(map[int]float64, len(candidates))
 	fmt.Println(matches)
+
+	
+
+
 	var wg sync.WaitGroup
-	for i, candidate := range candidates {
+	BatchSizeInt, err := strconv.Atoi(BatchSize)
+	if err != nil {
+		log.Fatal(err)
+	}
+	numBatches := len(candidates) / BatchSizeInt
+	remainingCandidates := len(candidates) % BatchSizeInt
+	for i := range numBatches {
 		wg.Add(1)
-		go func(i int, candidate *templates.SearchTemplate) {
+		fmt.Println("Batch: ", i)
+		
+		var from, to int 
+		if i == numBatches - 1 && remainingCandidates != 0 {
+			from = i * BatchSizeInt
+			to = from + remainingCandidates
+		} else {
+			from = i * BatchSizeInt
+			to = from + BatchSizeInt
+		}
+
+
+		go func(candidates []*templates.SearchTemplate, i int) {
 			defer wg.Done()
-			similarity := matcher.Match(context.Background(), candidate)
-			matches[i] = similarity
-		}(i, candidate)
+			for j, candidate := range candidates {
+				similarity := matcher.Match(context.Background(), candidate)
+				matches[j] = similarity
+			}
+		}(candidates[from:to], i)
 	}
 	wg.Wait()
 	fmt.Println(matches)
@@ -138,4 +189,9 @@ func MatchTemplates(
 		return -1
 	}
 	return UserMap[maxIndex]
+}
+
+func RefreshTemplatesLoaded() {
+	Templates = nil
+	LoadTemplates(&Templates)
 }
